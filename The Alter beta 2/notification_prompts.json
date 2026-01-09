@@ -1,0 +1,254 @@
+{
+    "notifications": [
+      {
+        "id": 1,
+        "category": "Convicting & Encouraging",
+        "message": "This could be the prayer that changes everything."
+      },
+      {
+        "id": 2,
+        "category": "Convicting & Encouraging",
+        "message": "He waited all day just to meet with you now."
+      },
+      {
+        "id": 3,
+        "category": "Convicting & Encouraging",
+        "message": "Don’t go to sleep with an unburnt altar."
+      },
+      {
+        "id": 4,
+        "category": "Convicting & Encouraging",
+        "message": "Your spirit is hungry. Feed it fire."
+      },
+      {
+        "id": 5,
+        "category": "Convicting & Encouraging",
+        "message": "One whisper of prayer shifts eternity."
+      },
+      {
+        "id": 6,
+        "category": "Convicting & Encouraging",
+        "message": "Heaven moves when you kneel."
+      },
+      {
+        "id": 7,
+        "category": "Convicting & Encouraging",
+        "message": "A prayerless day is a powerless day."
+      },
+      {
+        "id": 8,
+        "category": "Convicting & Encouraging",
+        "message": "God didn’t bring you this far to lose connection now."
+      },
+      {
+        "id": 9,
+        "category": "Convicting & Encouraging",
+        "message": "One spark starts the blaze. Just begin."
+      },
+      {
+        "id": 10,
+        "category": "Convicting & Encouraging",
+        "message": "He listens, even when your words are few."
+      },
+      {
+        "id": 11,
+        "category": "Convicting & Encouraging",
+        "message": "The altar is waiting. So is God."
+      },
+      {
+        "id": 12,
+        "category": "Convicting & Encouraging",
+        "message": "Your consistency is carving history in Heaven."
+      },
+      {
+        "id": 13,
+        "category": "Convicting & Encouraging",
+        "message": "No one else can burn your altar for you."
+      },
+      {
+        "id": 14,
+        "category": "Convicting & Encouraging",
+        "message": "If you knew who was watching, you’d never miss prayer."
+      },
+      {
+        "id": 15,
+        "category": "Convicting & Encouraging",
+        "message": "Prayer is not a task — it’s the breath of your spirit."
+      },
+      {
+        "id": 16,
+        "category": "Convicting & Encouraging",
+        "message": "Tired? Broken? Still pray. Especially then."
+      },
+      {
+        "id": 17,
+        "category": "Convicting & Encouraging",
+        "message": "Every prayer builds your legacy with God."
+      },
+      {
+        "id": 18,
+        "category": "Convicting & Encouraging",
+        "message": "He bottles your tears and remembers your words."
+      },
+      {
+        "id": 19,
+        "category": "Convicting & Encouraging",
+        "message": "No prayer is ever wasted. Ever."
+      },
+      {
+        "id": 20,
+        "category": "Convicting & Encouraging",
+        "message": "Don’t wait to feel holy — pray now."
+      },
+      {
+        "id": 21,
+        "category": "Convicting & Encouraging",
+        "message": "The altar doesn’t need perfect words. Just honest fire."
+      },
+      {
+        "id": 22,
+        "category": "Convicting & Encouraging",
+        "message": "Answered or not, prayer is how you win."
+      },
+      {
+        "id": 23,
+        "category": "Convicting & Encouraging",
+        "message": "Five minutes on your face can break years of chains."
+      },
+      {
+        "id": 24,
+        "category": "Convicting & Encouraging",
+        "message": "Your greatest spiritual growth starts at your weakest yes."
+      },
+      {
+        "id": 25,
+        "category": "Convicting & Encouraging",
+        "message": "Your altar may be private, but it shakes things publicly."
+      },
+      {
+        "id": 26,
+        "category": "Convicting & Encouraging",
+        "message": "If you're too busy to pray, you’re too busy to win."
+      },
+      {
+        "id": 27,
+        "category": "Convicting & Encouraging",
+        "message": "Skip prayer today… and feel it tomorrow."
+      },
+      {
+        "id": 28,
+        "category": "Convicting & Encouraging",
+        "message": "The flame dies slowly. Reignite it before it’s ash."
+      },
+      {
+        "id": 29,
+        "category": "Convicting & Encouraging",
+        "message": "Don’t wait for Sunday. Heaven is open now."
+      },
+      {
+        "id": 30,
+        "category": "Convicting & Encouraging",
+        "message": "The prayer you delay might be the one you need most."
+      },
+      {
+        "id": 31,
+        "category": "Identity-Based",
+        "message": "You are a priest. Light your altar."
+      },
+      {
+        "id": 32,
+        "category": "Identity-Based",
+        "message": "You are God’s dwelling place. Don’t go silent."
+      },
+      {
+        "id": 33,
+        "category": "Identity-Based",
+        "message": "Kings don’t skip war. And prayer is your battlefield."
+      },
+      {
+        "id": 34,
+        "category": "Identity-Based",
+        "message": "You’re not just a believer. You’re a burner."
+      },
+      {
+        "id": 35,
+        "category": "Identity-Based",
+        "message": "Priests don’t sleep through prayer."
+      },
+      {
+        "id": 36,
+        "category": "Identity-Based",
+        "message": "You carry authority. Use your voice."
+      },
+      {
+        "id": 37,
+        "category": "Identity-Based",
+        "message": "You are the temple. Prayer is your incense."
+      },
+      {
+        "id": 38,
+        "category": "Identity-Based",
+        "message": "Flames don’t fear the dark. You are the flame."
+      },
+      {
+        "id": 39,
+        "category": "Identity-Based",
+        "message": "You are His watchman. Stay on the wall."
+      },
+      {
+        "id": 40,
+        "category": "Identity-Based",
+        "message": "You are Heaven’s intercessor. Don’t go mute."
+      },
+      {
+        "id": 41,
+        "category": "Identity-Based",
+        "message": "You are not ordinary. So don’t pray ordinary."
+      },
+      {
+        "id": 42,
+        "category": "Identity-Based",
+        "message": "God called you to rule from the altar, not the scroll feed."
+      },
+      {
+        "id": 43,
+        "category": "Identity-Based",
+        "message": "You were born to war in the Spirit. Pick up your weapon."
+      },
+      {
+        "id": 44,
+        "category": "Identity-Based",
+        "message": "You’re a child of fire. Don’t live lukewarm."
+      },
+      {
+        "id": 45,
+        "category": "Identity-Based",
+        "message": "You were made for this moment. Burn, don’t back down."
+      },
+      {
+        "id": 46,
+        "category": "Identity-Based",
+        "message": "You are chosen. Priests don’t ghost God."
+      },
+      {
+        "id": 47,
+        "category": "Identity-Based",
+        "message": "Your voice echoes in heaven. Lift it."
+      },
+      {
+        "id": 48,
+        "category": "Identity-Based",
+        "message": "Your prayers outlive you. Pray like a legacy builder."
+      },
+      {
+        "id": 49,
+        "category": "Identity-Based",
+        "message": "You are not a slave to mood. You are a minister of fire."
+      },
+      {
+        "id": 50,
+        "category": "Identity-Based",
+        "message": "You carry God's name. Speak with Him often."
+      }
+    ]
+  }
