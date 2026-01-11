@@ -11,7 +11,7 @@
 		0A9321B525A248C08ED83DDF /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = D607C6689E77FBEF8CC45290 /* User.swift */; };
 		0E8F839068156A1D49BCA51F /* CommitmentProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0681CD017E7311CD282078B7 /* CommitmentProfile.swift */; };
 		1AB4F640E74E390FE6778641 /* IdentityClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ABC632E2E3280FAA9765D61 /* IdentityClass.swift */; };
-		332A0D8FC99D6CEDC21404A9 /* OnboardingViews2.swift in Sources */ = {isa = PBXBuildFile; fileRef = E686E9E0E99DD75E48470315 /* OnboardingViews2.swift */; };
+		332A0D8FC99D6CEDC21404A9 /* OnboardingCommitmentViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = E686E9E0E99DD75E48470315 /* OnboardingCommitmentViews.swift */; };
 		377BEB5F2FA22030C77C1275 /* AlarmsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB72BD3A20DC7D4C9E48EA5A /* AlarmsView.swift */; };
 		403DE6C7B4E6A02ADF6F366A /* SharedComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = F338DD97BA710EDE0BDEFA57 /* SharedComponents.swift */; };
 		493864D1BB4080E801ADDB09 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0891A9E9098530D6BFBE5351 /* SettingsView.swift */; };
@@ -27,8 +27,7 @@
 		9583EB3E839FE54DCA2CCCB8 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AA9C9565BB4D858AAE5932A /* NotificationManager.swift */; };
 		A02D55EB9C7AD43EC1AC6E49 /* RemindersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48EAE19AA1AB6D9ADE5C924F /* RemindersView.swift */; };
 		A1BDBC7B9D83CB3CE16601A0 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C273C71C57AC8C400D044CB2 /* Theme.swift */; };
-		A237667A2405300E394EF5A5 /* OnboardingViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A8D07EDEE4418DA4A31D436 /* OnboardingViews.swift */; };
-		A64DBEA6E47A0D263A185C7A /* Notifications+Intents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D09D5CC0AF1FBD65B06B29E /* Notifications+Intents.swift */; };
+		A237667A2405300E394EF5A5 /* OnboardingWelcomeViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A8D07EDEE4418DA4A31D436 /* OnboardingWelcomeViews.swift */; };
 		A9BBA1C14DF8C698D9285666 /* ErrorHandling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6DC96B97B2B9AB44421EBB /* ErrorHandling.swift */; };
 		AA1ADF8733876A1640E5F2A6 /* BibleViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 115D0FE58EA319342D9AF7DA /* BibleViews.swift */; };
 		B3399BADA349A5F3B595A05F /* TheAltarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C386D67281DACFD77FD729D8 /* TheAltarApp.swift */; };
@@ -62,12 +61,11 @@
 		0681CD017E7311CD282078B7 /* CommitmentProfile.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CommitmentProfile.swift; path = "The Alter beta 2/Models/CommitmentProfile.swift"; sourceTree = "<group>"; };
 		0891A9E9098530D6BFBE5351 /* SettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SettingsView.swift; path = "The Alter beta 2/Views/Settings/SettingsView.swift"; sourceTree = "<group>"; };
 		0ABC632E2E3280FAA9765D61 /* IdentityClass.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = IdentityClass.swift; path = "The Alter beta 2/Models/IdentityClass.swift"; sourceTree = "<group>"; };
-		0D09D5CC0AF1FBD65B06B29E /* Notifications+Intents.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "Notifications+Intents.swift"; path = "The Alter beta 2/Notifications+Intents.swift"; sourceTree = "<group>"; };
 		0EC553A10BBDD956BE3D51CB /* AppDataStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AppDataStore.swift; path = "The Alter beta 2/AppDataStore.swift"; sourceTree = "<group>"; };
 		115D0FE58EA319342D9AF7DA /* BibleViews.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = BibleViews.swift; path = "The Alter beta 2/Views/Bible/BibleViews.swift"; sourceTree = "<group>"; };
 		15B4299B9CB46DE3311268B8 /* VerseAction.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = VerseAction.swift; path = "The Alter beta 2/Models/VerseAction.swift"; sourceTree = "<group>"; };
 		38DBDD230DE5FAFE984024B7 /* PrayerViews.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PrayerViews.swift; path = "The Alter beta 2/Views/Prayer/PrayerViews.swift"; sourceTree = "<group>"; };
-		3A8D07EDEE4418DA4A31D436 /* OnboardingViews.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OnboardingViews.swift; path = "The Alter beta 2/Views/Onboarding/OnboardingViews.swift"; sourceTree = "<group>"; };
+		3A8D07EDEE4418DA4A31D436 /* OnboardingWelcomeViews.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OnboardingWelcomeViews.swift; path = "The Alter beta 2/Views/Onboarding/OnboardingWelcomeViews.swift"; sourceTree = "<group>"; };
 		48EAE19AA1AB6D9ADE5C924F /* RemindersView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemindersView.swift; path = "The Alter beta 2/Views/Alarms/RemindersView.swift"; sourceTree = "<group>"; };
 		5AA9C9565BB4D858AAE5932A /* NotificationManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = NotificationManager.swift; path = "The Alter beta 2/Managers/NotificationManager.swift"; sourceTree = "<group>"; };
 		5CBAD82FF8B958583A9945B6 /* ContentView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ContentView.swift; path = "The Alter beta 2/ContentView.swift"; sourceTree = "<group>"; };
@@ -87,7 +85,7 @@
 		CB72BD3A20DC7D4C9E48EA5A /* AlarmsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AlarmsView.swift; path = "The Alter beta 2/Views/Alarms/AlarmsView.swift"; sourceTree = "<group>"; };
 		D607C6689E77FBEF8CC45290 /* User.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = User.swift; path = "The Alter beta 2/Models/User.swift"; sourceTree = "<group>"; };
 		DD24ACC191A6BC1309985F5E /* BibleProgress.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = BibleProgress.swift; path = "The Alter beta 2/Models/BibleProgress.swift"; sourceTree = "<group>"; };
-		E686E9E0E99DD75E48470315 /* OnboardingViews2.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OnboardingViews2.swift; path = "The Alter beta 2/Views/Onboarding/OnboardingViews2.swift"; sourceTree = "<group>"; };
+		E686E9E0E99DD75E48470315 /* OnboardingCommitmentViews.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OnboardingCommitmentViews.swift; path = "The Alter beta 2/Views/Onboarding/OnboardingCommitmentViews.swift"; sourceTree = "<group>"; };
 		E883FEAFEEA0C0F6969BD88A /* Intents.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Intents.swift; path = "The Alter beta 2/Intents.swift"; sourceTree = "<group>"; };
 		EC0DA6EC2F4C5AFD305B1839 /* DailyMetrics.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DailyMetrics.swift; path = "The Alter beta 2/Models/DailyMetrics.swift"; sourceTree = "<group>"; };
 		F338DD97BA710EDE0BDEFA57 /* SharedComponents.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SharedComponents.swift; path = "The Alter beta 2/Views/Components/SharedComponents.swift"; sourceTree = "<group>"; };
@@ -160,7 +158,6 @@
 				15B4299B9CB46DE3311268B8 /* VerseAction.swift */,
 				9C7AF6384B52B691CA254717 /* Models.swift */,
 				9E6DC96B97B2B9AB44421EBB /* ErrorHandling.swift */,
-				0D09D5CC0AF1FBD65B06B29E /* Notifications+Intents.swift */,
 				C273C71C57AC8C400D044CB2 /* Theme.swift */,
 				115D0FE58EA319342D9AF7DA /* BibleViews.swift */,
 				0891A9E9098530D6BFBE5351 /* SettingsView.swift */,
@@ -170,8 +167,8 @@
 				48EAE19AA1AB6D9ADE5C924F /* RemindersView.swift */,
 				8E472BBEF0BDE91E800F1EA4 /* View+NavigationCompatibility.swift */,
 				F338DD97BA710EDE0BDEFA57 /* SharedComponents.swift */,
-				E686E9E0E99DD75E48470315 /* OnboardingViews2.swift */,
-				3A8D07EDEE4418DA4A31D436 /* OnboardingViews.swift */,
+				E686E9E0E99DD75E48470315 /* OnboardingCommitmentViews.swift */,
+				3A8D07EDEE4418DA4A31D436 /* OnboardingWelcomeViews.swift */,
 				5CBAD82FF8B958583A9945B6 /* ContentView.swift */,
 				ACA281948233E2C0E0795967 /* BibleCalculator.swift */,
 			);
@@ -355,7 +352,6 @@
 				ED65B411D68C9455865F1FC2 /* VerseAction.swift in Sources */,
 				0372B7AE1613E99DE7F8600D /* Models.swift in Sources */,
 				A9BBA1C14DF8C698D9285666 /* ErrorHandling.swift in Sources */,
-				A64DBEA6E47A0D263A185C7A /* Notifications+Intents.swift in Sources */,
 				A1BDBC7B9D83CB3CE16601A0 /* Theme.swift in Sources */,
 				AA1ADF8733876A1640E5F2A6 /* BibleViews.swift in Sources */,
 				493864D1BB4080E801ADDB09 /* SettingsView.swift in Sources */,
@@ -365,8 +361,8 @@
 				A02D55EB9C7AD43EC1AC6E49 /* RemindersView.swift in Sources */,
 				D4E304A0EA7A43465B686665 /* View+NavigationCompatibility.swift in Sources */,
 				403DE6C7B4E6A02ADF6F366A /* SharedComponents.swift in Sources */,
-				332A0D8FC99D6CEDC21404A9 /* OnboardingViews2.swift in Sources */,
-				A237667A2405300E394EF5A5 /* OnboardingViews.swift in Sources */,
+				332A0D8FC99D6CEDC21404A9 /* OnboardingCommitmentViews.swift in Sources */,
+				A237667A2405300E394EF5A5 /* OnboardingWelcomeViews.swift in Sources */,
 				C13C792AA414A1D2E99CF9AB /* ContentView.swift in Sources */,
 				DCEE62B5D00C8AA9B4AF259A /* BibleCalculator.swift in Sources */,
 			);
