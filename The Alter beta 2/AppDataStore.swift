@@ -253,7 +253,9 @@ final class AppDataStore: ObservableObject {
             verseId: verseId
         )
         prayerItems.append(item)
-        HapticManager.shared.trigger(.success)
+        Task { @MainActor in
+            HapticManager.shared.trigger(.success)
+        }
     }
 
     func markPrayerAnswered(_ itemId: UUID) {
