@@ -59,3 +59,9 @@ struct TheAlterShortcuts: AppShortcutsProvider {
     }
 }
 #endif
+
+// MARK: - Notification Extensions
+
+extension Notification.Name {
+    static let intentStartPrayer = Notification.Name("intentStartPrayer")
+}
