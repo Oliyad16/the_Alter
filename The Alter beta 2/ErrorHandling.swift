@@ -104,16 +104,18 @@ final class ErrorRecoveryManager: ObservableObject {
         switch error {
         case .dataCorruption(let details):
             DataRecoveryService.shared.restoreFromBackup(reason: details)
-            
+
         case .userDataLost:
             DataRecoveryService.shared.validateAndRecover()
-            
+
         case .audioPlaybackFailed:
-            AudioRecoveryService.shared.resetAudioSession()
-            
+            // Log error - no automatic recovery available
+            print("⚠️ [ErrorRecovery] Audio playback failed - user intervention required")
+
         case .networkUnavailable:
-            NetworkRecoveryService.shared.enableOfflineMode()
-            
+            // Log error - app should handle offline gracefully
+            print("⚠️ [ErrorRecovery] Network unavailable - offline mode")
+
         default:
             break
         }
@@ -315,47 +317,6 @@ final class DataRecoveryService {
         
         // In a production app, this would be sent to analytics
         print("📊 [DataRecovery] Recovery event logged: \(event)")
-    }
-}
-
-// MARK: - Audio Recovery Service
-
-final class AudioRecoveryService {
-    static let shared = AudioRecoveryService()
-    
-    private init() {}
-    
-    func resetAudioSession() {
-        print("🔧 [AudioRecovery] Resetting audio session")
-        
-        // This would integrate with your AudioManager
-        // AudioManager.shared.resetSession()
-        
-        // Attempt to restart background audio if needed
-        // AudioManager.shared.prepareForBackgroundPlayback()
-    }
-}
-
-// MARK: - Network Recovery Service
-
-final class NetworkRecoveryService {
-    static let shared = NetworkRecoveryService()
-    
-    @Published var isOfflineMode = false
-    
-    private init() {}
-    
-    func enableOfflineMode() {
-        print("📱 [NetworkRecovery] Enabling offline mode")
-        isOfflineMode = true
-        
-        // Disable network-dependent features
-        // Show offline indicator in UI
-    }
-    
-    func disableOfflineMode() {
-        print("🌐 [NetworkRecovery] Network restored - disabling offline mode")
-        isOfflineMode = false
     }
 }
 
