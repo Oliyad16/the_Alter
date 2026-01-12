@@ -107,3 +107,4 @@ struct SacredFlameIcon: View {
     .background(Color.altarBlack)
 }
 
+

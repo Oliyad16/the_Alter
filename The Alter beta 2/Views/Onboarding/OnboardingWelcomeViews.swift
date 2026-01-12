@@ -269,7 +269,7 @@ struct FlameColorSelectionView: View {
                             .padding(.horizontal)
                         
                         // Preview flame
-                        FlameView(intensity: 0.6, interactionEnabled: false, colorTheme: selectedTheme)
+                        SacredFlameIcon(size: 100, colorTheme: selectedTheme)
                             .frame(height: 150)
                             .padding(.vertical, AltarSpacing.medium)
                     }
@@ -319,7 +319,7 @@ struct FlameColorSelectionView: View {
         }) {
             HStack(spacing: AltarSpacing.medium) {
                 // Small flame preview
-                FlameView(intensity: 0.5, interactionEnabled: false, colorTheme: theme)
+                SacredFlameIcon(size: 40, colorTheme: theme)
                     .frame(width: 50, height: 50)
                 
                 VStack(alignment: .leading, spacing: 4) {
@@ -354,20 +354,6 @@ struct FlameColorSelectionView: View {
                     )
             )
             .cornerRadius(12)
-        }
-    }
-}
-
-// MARK: - FlameColorTheme Description Extension
-extension FlameColorTheme {
-    var description: String {
-        switch self {
-        case .classic: return "Traditional fire colors"
-        case .blue: return "Cool, sacred tones"
-        case .pink: return "Gentle, divine light"
-        case .green: return "Life and hope"
-        case .white: return "Pure holiness"
-        case .purple: return "Royal majesty"
         }
     }
 }

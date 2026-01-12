@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Tracking Status -->
+    <key>NSPrivacyTracking</key>
+    <false/>
+
+    <!-- Tracking Domains (empty - we don't track users) -->
+    <key>NSPrivacyTrackingDomains</key>
+    <array/>
+
+    <!-- Collected Data Types (none - all data stored locally) -->
+    <key>NSPrivacyCollectedDataTypes</key>
+    <array/>
+
+    <!-- Accessed API Types (APIs that require declaration) -->
+    <key>NSPrivacyAccessedAPITypes</key>
+    <array>
+        <!-- UserDefaults API -->
+        <dict>
+            <key>NSPrivacyAccessedAPIType</key>
+            <string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+            <key>NSPrivacyAccessedAPITypeReasons</key>
+            <array>
+                <!-- CA92.1: Access user defaults to read/write app preferences and user data -->
+                <string>CA92.1</string>
+            </array>
+        </dict>
+
+        <!-- File Timestamp API -->
+        <dict>
+            <key>NSPrivacyAccessedAPIType</key>
+            <string>NSPrivacyAccessedAPICategoryFileTimestamp</string>
+            <key>NSPrivacyAccessedAPITypeReasons</key>
+            <array>
+                <!-- C617.1: Access file modification times for cache management -->
+                <string>C617.1</string>
+            </array>
+        </dict>
+    </array>
+</dict>
+</plist>

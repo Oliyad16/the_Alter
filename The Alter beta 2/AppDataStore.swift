@@ -1,6 +1,30 @@
 import Foundation
 import Combine
 
+// MARK: - Streak Data Structure
+struct StreakData: Codable {
+    var prayerStreak: Int = 0
+    var longestPrayerStreak: Int = 0
+    var lastPrayerDate: Date? = nil
+
+    var readingStreak: Int = 0
+    var longestReadingStreak: Int = 0
+    var lastReadingDate: Date? = nil
+}
+
+// MARK: - Bible Progress Stats
+struct BibleProgressStats {
+    let totalChaptersGoal: Int
+    let chaptersCompleted: Int
+    let percentComplete: Double
+    let isOnTrack: Bool
+    let chaptersAheadOrBehind: Int
+    let updatedChaptersPerDay: Double
+    let daysRemaining: Int
+    let statusMessage: String
+    let weeklyChaptersRead: Int
+}
+
 final class AppDataStore: ObservableObject {
     // MARK: - Published Properties
     @Published var currentUser: User? { didSet { persistUser() } }
@@ -12,6 +36,9 @@ final class AppDataStore: ObservableObject {
     @Published var dailyMetrics: [DailyMetrics] = [] { didSet { persistDailyMetrics() } }
     @Published var alarms: [Alarm] = [] { didSet { persistAlarms() } }
     @Published var reminders: [Reminder] = [] { didSet { persistReminders() } }
+
+    // MARK: - Streak Data
+    @Published var streakData: StreakData = StreakData() { didSet { persistStreakData() } }
 
     // MARK: - Flame Color Theme
     @Published var flameColorTheme: FlameColorTheme = .classic {
@@ -60,6 +87,7 @@ final class AppDataStore: ObservableObject {
     private let dailyMetricsKey = "dailyMetrics.v2"
     private let alarmsKey = "alarms.v2"
     private let remindersKey = "reminders.v2"
+    private let streakDataKey = "streakData.v2"
 
     init() {
         loadAll()
@@ -76,6 +104,7 @@ final class AppDataStore: ObservableObject {
         dailyMetrics = loadData(key: dailyMetricsKey, type: [DailyMetrics].self) ?? []
         alarms = loadData(key: alarmsKey, type: [Alarm].self) ?? []
         reminders = loadData(key: remindersKey, type: [Reminder].self) ?? []
+        streakData = loadData(key: streakDataKey, type: StreakData.self) ?? StreakData()
 
         // Load flame color theme
         if let storedTheme = UserDefaults.standard.string(forKey: flameColorThemeKey),
@@ -140,6 +169,10 @@ final class AppDataStore: ObservableObject {
         persistData(reminders, key: remindersKey)
     }
 
+    private func persistStreakData() {
+        persistData(streakData, key: streakDataKey)
+    }
+
     private func persistData<T: Codable>(_ data: T, key: String) {
         if let encoded = try? JSONEncoder().encode(data) {
             UserDefaults.standard.set(encoded, forKey: key)
@@ -166,6 +199,9 @@ final class AppDataStore: ObservableObject {
 
         // Update daily metrics
         updateTodaysMetrics(readingMinutes: 5, chaptersRead: 1)
+
+        // Update streaks
+        updateStreaks()
     }
 
     // MARK: - Verse Actions
@@ -235,6 +271,9 @@ final class AppDataStore: ObservableObject {
         // Update daily metrics
         let duration = prayerSessions[index].durationMinutes
         updateTodaysMetrics(prayerMinutes: duration)
+
+        // Update streaks
+        updateStreaks()
     }
 
     // MARK: - Prayer Items
@@ -296,6 +335,127 @@ final class AppDataStore: ObservableObject {
         return dailyMetrics.first {
             Calendar.current.isDate($0.date, inSameDayAs: date)
         }
+    }
+
+    // MARK: - Bible Progress Calculations
+    var bibleProgressStats: BibleProgressStats {
+        guard let commitment = commitmentProfile else {
+            return BibleProgressStats(
+                totalChaptersGoal: 0,
+                chaptersCompleted: 0,
+                percentComplete: 0,
+                isOnTrack: true,
+                chaptersAheadOrBehind: 0,
+                updatedChaptersPerDay: 0,
+                daysRemaining: 0,
+                statusMessage: "Set your Bible reading goal to track progress",
+                weeklyChaptersRead: 0
+            )
+        }
+
+        let totalChaptersGoal = BibleCalculator.totalChapters * commitment.bibleReadsTarget
+        let chaptersCompleted = bibleProgress.count
+        let percentComplete = totalChaptersGoal > 0 ? Double(chaptersCompleted) / Double(totalChaptersGoal) * 100 : 0
+
+        let calendar = Calendar.current
+        let now = Date()
+        let daysElapsed = max(1, calendar.dateComponents([.day], from: commitment.startDate, to: now).day ?? 1)
+        let daysRemaining = max(0, calendar.dateComponents([.day], from: now, to: commitment.endDate).day ?? 0)
+
+        let totalDays = max(1, calendar.dateComponents([.day], from: commitment.startDate, to: commitment.endDate).day ?? 1)
+        let expectedChapters = Double(totalChaptersGoal) * (Double(daysElapsed) / Double(totalDays))
+        let chaptersAheadOrBehind = chaptersCompleted - Int(expectedChapters.rounded())
+        let isOnTrack = chaptersAheadOrBehind >= -3
+
+        let chaptersRemaining = max(0, totalChaptersGoal - chaptersCompleted)
+        let updatedChaptersPerDay = daysRemaining > 0 ? Double(chaptersRemaining) / Double(daysRemaining) : 0
+
+        let weekStart = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now)) ?? now
+        let weeklyChaptersRead = bibleProgress.filter { $0.completedAt >= weekStart }.count
+
+        let statusMessage: String
+        if chaptersCompleted >= totalChaptersGoal {
+            statusMessage = "Goal completed! Praise God!"
+        } else if chaptersAheadOrBehind > 5 {
+            statusMessage = "Ahead of schedule! Keep going!"
+        } else if chaptersAheadOrBehind >= -3 {
+            statusMessage = "Right on track!"
+        } else if daysRemaining > 0 {
+            statusMessage = "You can still finish! Read \(Int(updatedChaptersPerDay.rounded(.up))) chapters/day"
+        } else {
+            statusMessage = "Behind schedule, but keep reading!"
+        }
+
+        return BibleProgressStats(
+            totalChaptersGoal: totalChaptersGoal,
+            chaptersCompleted: chaptersCompleted,
+            percentComplete: percentComplete,
+            isOnTrack: isOnTrack,
+            chaptersAheadOrBehind: chaptersAheadOrBehind,
+            updatedChaptersPerDay: updatedChaptersPerDay,
+            daysRemaining: daysRemaining,
+            statusMessage: statusMessage,
+            weeklyChaptersRead: weeklyChaptersRead
+        )
+    }
+
+    // MARK: - Streak Calculation
+    func updateStreaks() {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        updatePrayerStreak(today: today, calendar: calendar)
+        updateReadingStreak(today: today, calendar: calendar)
+    }
+
+    private func updatePrayerStreak(today: Date, calendar: Calendar) {
+        let prayerDates = Set(prayerSessions
+            .filter { $0.endTime != nil }
+            .map { calendar.startOfDay(for: $0.startTime) })
+
+        let newStreak = calculateStreak(dates: prayerDates, today: today, calendar: calendar)
+        streakData.prayerStreak = newStreak
+        if newStreak > streakData.longestPrayerStreak {
+            streakData.longestPrayerStreak = newStreak
+        }
+        if prayerDates.contains(today) {
+            streakData.lastPrayerDate = today
+        }
+    }
+
+    private func updateReadingStreak(today: Date, calendar: Calendar) {
+        let readingDates = Set(dailyMetrics
+            .filter { $0.chaptersRead > 0 }
+            .map { calendar.startOfDay(for: $0.date) })
+
+        let newStreak = calculateStreak(dates: readingDates, today: today, calendar: calendar)
+        streakData.readingStreak = newStreak
+        if newStreak > streakData.longestReadingStreak {
+            streakData.longestReadingStreak = newStreak
+        }
+        if readingDates.contains(today) {
+            streakData.lastReadingDate = today
+        }
+    }
+
+    private func calculateStreak(dates: Set<Date>, today: Date, calendar: Calendar) -> Int {
+        if dates.isEmpty { return 0 }
+        var streak = 0
+        var currentDay = today
+
+        while dates.contains(currentDay) {
+            streak += 1
+            guard let previousDay = calendar.date(byAdding: .day, value: -1, to: currentDay) else { break }
+            currentDay = previousDay
+        }
+
+        if !dates.contains(today) {
+            if let yesterday = calendar.date(byAdding: .day, value: -1, to: today),
+               !dates.contains(yesterday) {
+                return 0
+            }
+        }
+
+        return streak
     }
 
     // MARK: - Alarms & Reminders

@@ -71,13 +71,7 @@ struct MeetingPlaceView: View {
         
         let durationMinutes = Int((Date().timeIntervalSince(sessionStartTime)) / 60)
         dataStore.endPrayerSession(sessionId)
-        
-        // Track trophy progress
-        TrophyManager.shared.trackPrayerSession(
-            durationMinutes: durationMinutes,
-            startTime: sessionStartTime
-        )
-        
+
         HapticManager.shared.trigger(.light)
         updateIdleTimer(shouldStayAwake: false)
         withAnimation(AltarAnimations.gentle) {
@@ -95,7 +89,9 @@ struct MeetingPlaceView: View {
                 remaining -= 1
                 if remaining <= 0 {
                     isTimerRunning = false
-                    HapticManager.shared.trigger(.heavy)
+                    Task { @MainActor in
+                        HapticManager.shared.trigger(.heavy)
+                    }
                 }
             }
         }

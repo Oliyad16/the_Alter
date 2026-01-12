@@ -2,66 +2,9 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var dataStore: AppDataStore
-    @StateObject private var trophyManager = TrophyManager.shared
     @State private var hasAppeared = false
-    @State private var showFlameDetails = false
-    @State private var showTrophyCelebration = false
-    @State private var unlockedTrophy: Trophy?
 
     // MARK: - Computed Properties
-    private var greeting: String {
-        let hour = Calendar.current.component(.hour, from: Date())
-        switch hour {
-        case 0..<12: return "Good morning"
-        case 12..<17: return "Good afternoon"
-        case 17..<22: return "Good evening"
-        default: return "Peace to you"
-        }
-    }
-
-    private var userName: String {
-        "Friend"
-    }
-
-    private var weeklyMinutes: Int {
-        let startOfWeek = Calendar.current.date(from: Calendar.current.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())) ?? Date()
-        return dataStore.prayerSessions
-            .filter { $0.startTime >= startOfWeek }
-            .map { $0.durationMinutes }
-            .reduce(0, +)
-    }
-
-    private var streakDays: Int {
-        let calendar = Calendar.current
-        let dates = Set(dataStore.prayerSessions.map { calendar.startOfDay(for: $0.startTime) })
-        var streak = 0
-        var day = calendar.startOfDay(for: Date())
-        while dates.contains(day) {
-            streak += 1
-            if let prev = calendar.date(byAdding: .day, value: -1, to: day) { day = prev } else { break }
-        }
-        return streak
-    }
-
-    private var totalSessions: Int {
-        dataStore.prayerSessions.count
-    }
-
-    private var flameIntensity: Double {
-        trophyManager.getFlameIntensity()
-    }
-    
-    private var currentFlameLevel: FlameLevel {
-        FlameLevel.from(intensity: flameIntensity)
-    }
-
-    private var greetingSubtitle: String {
-        if weeklyMinutes > 0 {
-            return "This week: \(weeklyMinutes)m of prayer"
-        }
-        return "Ignite your altar today"
-    }
-
     private var currentVerse: (text: String, reference: String) {
         let verses: [(String, String)] = [
             ("Pray without ceasing.", "1 Thessalonians 5:17"),
@@ -85,66 +28,9 @@ struct HomeView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
-                    // Flame Section
-                    VStack(spacing: 8) {
-                        Button(action: {
-                            HapticManager.shared.trigger(.light)
-                            showFlameDetails = true
-                        }) {
-                            FlameView(intensity: flameIntensity, colorTheme: dataStore.flameColorTheme)
-                                .frame(height: 180)
-                        }
-                        .buttonStyle(PlainButtonStyle())
+                    // Progress Dashboard
+                    ProgressDashboard()
                         .slideIn(delay: 0.1)
-
-                        Text("\(greeting), \(userName)")
-                            .font(.title.bold())
-                            .foregroundColor(.white)
-                            .slideIn(delay: 0.2)
-
-                        Text(greetingSubtitle)
-                            .font(.body)
-                            .foregroundStyle(.secondary)
-                            .slideIn(delay: 0.3)
-
-                        // Flame Level Badge
-                        HStack(spacing: 12) {
-                            Text(currentFlameLevel.displayName)
-                                .font(.caption.weight(.semibold))
-                                .foregroundColor(dataStore.flameColorTheme.glowColor)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 4)
-                                .background(dataStore.flameColorTheme.glowColor.opacity(0.15))
-                                .cornerRadius(12)
-                            
-                            // Trophy indicator
-                            if !trophyManager.trophies.isEmpty {
-                                Button(action: {
-                                    HapticManager.shared.trigger(.light)
-                                    // Could show trophy details or celebration
-                                }) {
-                                    HStack(spacing: 4) {
-                                        Image(systemName: "trophy.fill")
-                                            .font(.caption)
-                                        Text("\(trophyManager.trophies.filter { $0.isUnlocked }.count)/\(trophyManager.trophies.count)")
-                                            .font(.caption2.weight(.semibold))
-                                    }
-                                    .foregroundColor(trophyManager.getCurrentTrophyTier().color)
-                                    .padding(.horizontal, 10)
-                                    .padding(.vertical, 4)
-                                    .background(trophyManager.getCurrentTrophyTier().color.opacity(0.15))
-                                    .cornerRadius(12)
-                                }
-                                .buttonStyle(PlainButtonStyle())
-                            }
-                        }
-                        .slideIn(delay: 0.4)
-                    }
-                    .padding(.top, 24)
-
-                    // Analytics Section
-                    analyticsSection
-                        .slideIn(delay: 0.5)
 
                     // Quick Start Buttons
                     quickStartButtons
@@ -165,58 +51,13 @@ struct HomeView: View {
             .background(Color.altarBlack.ignoresSafeArea())
             .navigationTitle("Home")
             .preferredColorScheme(.dark)
-            .sheet(isPresented: $showFlameDetails) {
-                FlameDetailsSheet(
-                    flameLevel: currentFlameLevel,
-                    intensity: flameIntensity,
-                    colorTheme: dataStore.flameColorTheme
-                )
-            }
-            .sheet(isPresented: $showTrophyCelebration) {
-                if let trophy = unlockedTrophy {
-                    TrophyCelebrationView(trophy: trophy)
-                }
-            }
-            .onReceive(NotificationCenter.default.publisher(for: .trophyUnlocked)) { notification in
-                if let trophy = notification.object as? Trophy {
-                    unlockedTrophy = trophy
-                    showTrophyCelebration = true
+            .onAppear {
+                if !hasAppeared {
+                    hasAppeared = true
+                    dataStore.updateStreaks()
                 }
             }
         }
-    }
-
-    // MARK: - Analytics Section
-    @ViewBuilder
-    private var analyticsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Your Week")
-                .font(.headline)
-                .foregroundColor(.white)
-
-            HStack(spacing: 16) {
-                metricCard(title: "Weekly", value: "\(weeklyMinutes)m")
-                metricCard(title: "Streak", value: "\(streakDays)d")
-                metricCard(title: "Sessions", value: "\(totalSessions)")
-            }
-            .frame(maxWidth: .infinity)
-        }
-        .altarCardStyle()
-    }
-
-    private func metricCard(title: String, value: String) -> some View {
-        VStack {
-            Text(value)
-                .font(.title2.bold())
-                .foregroundColor(.altarOrange)
-            Text(title)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(12)
-        .background(RoundedRectangle(cornerRadius: 12).fill(Color.altarCard))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.altarCardBorder, lineWidth: 1))
     }
 
     // MARK: - Quick Start Buttons

@@ -63,3 +63,4 @@ The free tier of API.Bible includes:
 
 For more information, visit: https://scripture.api.bible/docs
 
+

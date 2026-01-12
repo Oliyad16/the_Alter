@@ -3,6 +3,102 @@ import SwiftUI
 import UIKit
 #endif
 
+// MARK: - Flame Color Theme
+enum FlameColorTheme: String, CaseIterable, Identifiable, Codable {
+    case classic = "classic"
+    case blue = "blue"
+    case pink = "pink"
+    case green = "green"
+    case white = "white"
+    case purple = "purple"
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .classic: return "Classic Fire"
+        case .blue: return "Sacred Blue"
+        case .pink: return "Divine Rose"
+        case .green: return "Living Hope"
+        case .white: return "Holy Light"
+        case .purple: return "Royal Flame"
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .classic: return "Warm fire colors"
+        case .blue: return "Cool sacred tones"
+        case .pink: return "Divine rose hues"
+        case .green: return "Living hope green"
+        case .white: return "Pure holy light"
+        case .purple: return "Royal flame purple"
+        }
+    }
+
+    var primaryColors: [Color] {
+        switch self {
+        case .classic:
+            return [Color.altarRed, Color.altarOrange, Color.altarYellow]
+        case .blue:
+            return [Color.blue, Color.cyan, Color.mint]
+        case .pink:
+            return [Color.pink, Color.purple.opacity(0.8), Color.white.opacity(0.9)]
+        case .green:
+            return [Color.green, Color.mint, Color.yellow.opacity(0.8)]
+        case .white:
+            return [Color.white, Color.gray.opacity(0.3), Color.clear]
+        case .purple:
+            return [Color.purple, Color.indigo, Color.pink.opacity(0.7)]
+        }
+    }
+
+    var secondaryColors: [Color] {
+        switch self {
+        case .classic:
+            return [Color.altarOrange, Color.altarYellow, Color.white.opacity(0.6)]
+        case .blue:
+            return [Color.cyan, Color.mint, Color.blue.opacity(0.6)]
+        case .pink:
+            return [Color.purple.opacity(0.6), Color.white.opacity(0.8), Color.pink.opacity(0.4)]
+        case .green:
+            return [Color.mint, Color.yellow.opacity(0.6), Color.green.opacity(0.7)]
+        case .white:
+            return [Color.gray.opacity(0.2), Color.clear, Color.white.opacity(0.3)]
+        case .purple:
+            return [Color.indigo, Color.pink.opacity(0.5), Color.purple.opacity(0.6)]
+        }
+    }
+
+    var coreColors: [Color] {
+        switch self {
+        case .classic:
+            return [Color.white, Color.altarYellow, Color.altarOrange]
+        case .blue:
+            return [Color.white, Color.cyan, Color.blue.opacity(0.7)]
+        case .pink:
+            return [Color.white, Color.pink, Color.purple.opacity(0.5)]
+        case .green:
+            return [Color.white, Color.mint, Color.green.opacity(0.6)]
+        case .white:
+            return [Color.white, Color.gray.opacity(0.1), Color.clear]
+        case .purple:
+            return [Color.white, Color.indigo, Color.purple.opacity(0.7)]
+        }
+    }
+
+    var glowColor: Color {
+        switch self {
+        case .classic: return Color.altarOrange
+        case .blue: return Color.cyan
+        case .pink: return Color.pink
+        case .green: return Color.mint
+        case .white: return Color.white
+        case .purple: return Color.indigo
+        }
+    }
+}
+
 // MARK: - Colors (Fire & Night Aesthetic)
 extension Color {
     // Primary accent: Altar Red (Fire)
