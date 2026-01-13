@@ -35,6 +35,71 @@ enum HighlightColor: String, Codable, CaseIterable, Identifiable {
     }
 }
 
+enum HighlightCategory: String, Codable, CaseIterable, Identifiable {
+    case favorites = "Favorites"
+    case actionItems = "Action Items"
+    case questions = "Questions"
+    case insights = "Insights"
+    case prayer = "Prayer Verses"
+    case memorization = "Memorization"
+    case shareLater = "Share Later"
+    case general = "General"
+
+    var id: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .favorites: return "star.fill"
+        case .actionItems: return "checkmark.circle.fill"
+        case .questions: return "questionmark.circle.fill"
+        case .insights: return "lightbulb.fill"
+        case .prayer: return "flame.fill"
+        case .memorization: return "brain.head.profile"
+        case .shareLater: return "square.and.arrow.up.fill"
+        case .general: return "tag.fill"
+        }
+    }
+
+    var defaultColor: HighlightColor {
+        switch self {
+        case .favorites: return .yellow
+        case .actionItems: return .green
+        case .questions: return .blue
+        case .insights: return .orange
+        case .prayer: return .pink
+        case .memorization: return .purple
+        case .shareLater: return .red
+        case .general: return .yellow
+        }
+    }
+
+    var iconColor: Color {
+        switch self {
+        case .favorites: return .yellow
+        case .actionItems: return .green
+        case .questions: return .blue
+        case .insights: return .orange
+        case .prayer: return .pink
+        case .memorization: return .purple
+        case .shareLater: return .red
+        case .general: return .gray
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .favorites: return "Verses you love and cherish"
+        case .actionItems: return "Verses to apply in your life"
+        case .questions: return "Verses to study and understand better"
+        case .insights: return "Aha moments and revelations"
+        case .prayer: return "Verses to pray and meditate on"
+        case .memorization: return "Verses you want to memorize"
+        case .shareLater: return "Verses to share with others"
+        case .general: return "General highlights"
+        }
+    }
+}
+
 struct VerseAction: Identifiable, Codable {
     let id: UUID
     var userId: UUID
@@ -43,6 +108,7 @@ struct VerseAction: Identifiable, Codable {
     var content: String? // Store verse text for offline access
     var noteText: String? // For note action type
     var highlightColor: HighlightColor? // For highlight action type
+    var highlightCategory: HighlightCategory? // For highlight categorization (optional for backward compatibility)
     var createdAt: Date
     var prayedAt: Date? // When user actually prayed for this verse
 
@@ -53,6 +119,7 @@ struct VerseAction: Identifiable, Codable {
          content: String? = nil,
          noteText: String? = nil,
          highlightColor: HighlightColor? = nil,
+         highlightCategory: HighlightCategory? = nil,
          createdAt: Date = Date(),
          prayedAt: Date? = nil) {
         self.id = id
@@ -62,6 +129,7 @@ struct VerseAction: Identifiable, Codable {
         self.content = content
         self.noteText = noteText
         self.highlightColor = highlightColor
+        self.highlightCategory = highlightCategory
         self.createdAt = createdAt
         self.prayedAt = prayedAt
     }

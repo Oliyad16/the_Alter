@@ -3,6 +3,9 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject var dataStore: AppDataStore
     @State private var selectedTab: MainTab = .home
+    @State private var achievementsToShow: [Achievement] = []
+    @State private var showingAchievement = false
+    @State private var currentAchievementIndex = 0
 
     private enum MainTab: Hashable {
         case home
@@ -41,6 +44,46 @@ struct ContentView: View {
         .preferredColorScheme(.dark)
         .onReceive(NotificationCenter.default.publisher(for: .intentStartPrayer)) { _ in
             selectedTab = .pray
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .achievementsUnlocked)) { notification in
+            if let achievements = notification.userInfo?["achievements"] as? [Achievement] {
+                achievementsToShow = achievements
+                currentAchievementIndex = 0
+                showNextAchievement()
+            }
+        }
+        .overlay {
+            if showingAchievement && currentAchievementIndex < achievementsToShow.count {
+                AchievementUnlockView(
+                    achievement: achievementsToShow[currentAchievementIndex],
+                    isPresented: $showingAchievement
+                )
+                .transition(.scale.combined(with: .opacity))
+                .onChange(of: showingAchievement) { _, isShowing in
+                    if !isShowing {
+                        showNextAchievementAfterDelay()
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Achievement Queue Management
+
+    private func showNextAchievement() {
+        if currentAchievementIndex < achievementsToShow.count {
+            showingAchievement = true
+        }
+    }
+
+    private func showNextAchievementAfterDelay() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            currentAchievementIndex += 1
+            if currentAchievementIndex < achievementsToShow.count {
+                showNextAchievement()
+            } else {
+                achievementsToShow = []
+            }
         }
     }
 }

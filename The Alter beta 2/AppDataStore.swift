@@ -40,6 +40,9 @@ final class AppDataStore: ObservableObject {
     // MARK: - Streak Data
     @Published var streakData: StreakData = StreakData() { didSet { persistStreakData() } }
 
+    // MARK: - Achievement Progress
+    @Published var achievementProgress: AchievementProgress = AchievementProgress() { didSet { persistAchievementProgress() } }
+
     // MARK: - Flame Color Theme
     @Published var flameColorTheme: FlameColorTheme = .classic {
         didSet {
@@ -88,6 +91,7 @@ final class AppDataStore: ObservableObject {
     private let alarmsKey = "alarms.v2"
     private let remindersKey = "reminders.v2"
     private let streakDataKey = "streakData.v2"
+    private let achievementProgressKey = "achievementProgress.v2"
 
     init() {
         loadAll()
@@ -105,6 +109,7 @@ final class AppDataStore: ObservableObject {
         alarms = loadData(key: alarmsKey, type: [Alarm].self) ?? []
         reminders = loadData(key: remindersKey, type: [Reminder].self) ?? []
         streakData = loadData(key: streakDataKey, type: StreakData.self) ?? StreakData()
+        achievementProgress = loadData(key: achievementProgressKey, type: AchievementProgress.self) ?? AchievementProgress()
 
         // Load flame color theme
         if let storedTheme = UserDefaults.standard.string(forKey: flameColorThemeKey),
@@ -173,6 +178,10 @@ final class AppDataStore: ObservableObject {
         persistData(streakData, key: streakDataKey)
     }
 
+    private func persistAchievementProgress() {
+        persistData(achievementProgress, key: achievementProgressKey)
+    }
+
     private func persistData<T: Codable>(_ data: T, key: String) {
         if let encoded = try? JSONEncoder().encode(data) {
             UserDefaults.standard.set(encoded, forKey: key)
@@ -191,6 +200,20 @@ final class AppDataStore: ObservableObject {
         currentUser?.onboardingCompleted = true
     }
 
+    // MARK: - Achievements
+    @MainActor
+    func checkAndTriggerAchievements() {
+        let newAchievements = AchievementManager.shared.checkAchievements(dataStore: self)
+
+        if !newAchievements.isEmpty {
+            NotificationCenter.default.post(
+                name: .achievementsUnlocked,
+                object: nil,
+                userInfo: ["achievements": newAchievements]
+            )
+        }
+    }
+
     // MARK: - Bible Progress
     func markChapterComplete(book: String, chapter: Int) {
         guard let userId = currentUser?.id else { return }
@@ -202,12 +225,15 @@ final class AppDataStore: ObservableObject {
 
         // Update streaks
         updateStreaks()
+
+        // Check achievements
+        Task { await checkAndTriggerAchievements() }
     }
 
     // MARK: - Verse Actions
-    func addVerseAction(verseId: String, action: VerseActionType, content: String?, highlightColor: HighlightColor? = nil) {
+    func addVerseAction(verseId: String, action: VerseActionType, content: String?, highlightColor: HighlightColor? = nil, highlightCategory: HighlightCategory? = nil) {
         guard let userId = currentUser?.id else { return }
-        let verseAction = VerseAction(userId: userId, verseId: verseId, action: action, content: content, highlightColor: highlightColor)
+        let verseAction = VerseAction(userId: userId, verseId: verseId, action: action, content: content, highlightColor: highlightColor, highlightCategory: highlightCategory)
         verseActions.append(verseAction)
     }
 
@@ -253,6 +279,44 @@ final class AppDataStore: ObservableObject {
         verseActions[index].highlightColor = color
     }
 
+    func updateHighlight(verseId: String, color: HighlightColor, category: HighlightCategory) {
+        guard let index = verseActions.firstIndex(where: { $0.verseId == verseId && $0.action == .highlight }) else { return }
+        verseActions[index].highlightColor = color
+        verseActions[index].highlightCategory = category
+    }
+
+    func getHighlights() -> [VerseAction] {
+        return verseActions.filter { $0.action == .highlight }
+    }
+
+    func getHighlights(byCategory category: HighlightCategory?) -> [VerseAction] {
+        let highlights = verseActions.filter { $0.action == .highlight }
+        if let category = category {
+            return highlights.filter { ($0.highlightCategory ?? .general) == category }
+        }
+        return highlights
+    }
+
+    func getHighlights(byCategories categories: Set<HighlightCategory>) -> [VerseAction] {
+        return verseActions.filter {
+            $0.action == .highlight &&
+            categories.contains($0.highlightCategory ?? .general)
+        }
+    }
+
+    func getHighlightCategoryStats() -> [HighlightCategory: Int] {
+        let highlights = getHighlights()
+        var stats: [HighlightCategory: Int] = [:]
+
+        for category in HighlightCategory.allCases {
+            stats[category] = highlights.filter {
+                ($0.highlightCategory ?? .general) == category
+            }.count
+        }
+
+        return stats
+    }
+
     // MARK: - Prayer Sessions
     func startPrayerSession(silentMode: Bool = false) -> PrayerSession? {
         guard let userId = currentUser?.id else {
@@ -274,6 +338,9 @@ final class AppDataStore: ObservableObject {
 
         // Update streaks
         updateStreaks()
+
+        // Check achievements
+        Task { await checkAndTriggerAchievements() }
     }
 
     // MARK: - Prayer Items
@@ -301,6 +368,9 @@ final class AppDataStore: ObservableObject {
         guard let index = prayerItems.firstIndex(where: { $0.id == itemId }) else { return }
         prayerItems[index].answered = true
         prayerItems[index].answeredAt = Date()
+
+        // Check achievements
+        Task { await checkAndTriggerAchievements() }
     }
 
     func getRememberedPrayers() -> [PrayerItem] {

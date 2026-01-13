@@ -1,5 +1,67 @@
 import SwiftUI
 
+private struct VerseSelection: Identifiable {
+    let id: String
+    let text: String
+}
+
+private func parseBibleVerses(from content: String) -> [(verseNumber: Int, text: String)] {
+    var cleaned = content.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
+    cleaned = cleaned.replacingOccurrences(of: "&nbsp;", with: " ")
+    cleaned = cleaned.replacingOccurrences(of: "&amp;", with: "&")
+    cleaned = cleaned.replacingOccurrences(of: "&quot;", with: "\"")
+    cleaned = cleaned.replacingOccurrences(of: "&lt;", with: "<")
+    cleaned = cleaned.replacingOccurrences(of: "&gt;", with: ">")
+    cleaned = cleaned.replacingOccurrences(of: "&#39;", with: "'")
+
+    let nsString = cleaned as NSString
+
+    func parse(with pattern: String, numberGroup: Int) -> [(verseNumber: Int, text: String)] {
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else { return [] }
+        let matches = regex.matches(in: cleaned, options: [], range: NSRange(location: 0, length: nsString.length))
+        guard !matches.isEmpty else { return [] }
+
+        var verses: [(verseNumber: Int, text: String)] = []
+        for (index, match) in matches.enumerated() {
+            let numberRange = match.range(at: numberGroup)
+            guard numberRange.location != NSNotFound,
+                  let verseNumber = Int(nsString.substring(with: numberRange)),
+                  let matchRange = Range(match.range, in: cleaned) else { continue }
+
+            let startIndex = matchRange.upperBound
+            let endIndex: String.Index
+            if index < matches.count - 1,
+               let nextRange = Range(matches[index + 1].range, in: cleaned) {
+                endIndex = nextRange.lowerBound
+            } else {
+                endIndex = cleaned.endIndex
+            }
+
+            let verseText = String(cleaned[startIndex..<endIndex])
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+
+            if !verseText.isEmpty {
+                verses.append((verseNumber: verseNumber, text: verseText))
+            }
+        }
+        return verses
+    }
+
+    var verses = parse(with: "\\[(\\d+)\\]", numberGroup: 1)
+    if verses.isEmpty {
+        verses = parse(with: "(?m)^\\s*(\\d+)\\s+", numberGroup: 1)
+    }
+
+    if verses.isEmpty {
+        let trimmed = cleaned.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmed.isEmpty {
+            verses.append((verseNumber: 1, text: trimmed))
+        }
+    }
+
+    return verses
+}
+
 // MARK: - Bible Reader Main View (Bold & Expressive)
 struct BibleReaderView: View {
     @EnvironmentObject var dataStore: AppDataStore
@@ -181,7 +243,7 @@ struct BibleReaderView: View {
             .sheet(isPresented: $showVersePicker) {
                 if let chapter = selectedChapter {
                     VersePickerSheet(
-                        parsedVerses: parseVersesFromChapter(chapter.content),
+                        parsedVerses: parseBibleVerses(from: chapter.content),
                         currentVerse: nil,
                         onSelectVerse: { verseNum in
                             // For now, just dismiss. ScrollViewReader integration would be needed for scrolling
@@ -342,33 +404,6 @@ struct BibleReaderView: View {
         return bookProgress.max(by: { $0.completedAt < $1.completedAt })?.chapter
     }
 
-    private func parseVersesFromChapter(_ content: String) -> [(verseNumber: Int, text: String)] {
-        // Remove HTML tags first
-        var cleaned = content.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
-        cleaned = cleaned.replacingOccurrences(of: "&nbsp;", with: " ")
-        cleaned = cleaned.replacingOccurrences(of: "&amp;", with: "&")
-        cleaned = cleaned.replacingOccurrences(of: "&quot;", with: "\"")
-
-        // Match verse patterns: [1] verse text or (1) verse text
-        let pattern = "\\[(\\d+)\\]\\s*([^\\[\\]]+?)(?=\\[\\d+\\]|$)"
-        guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else {
-            return []
-        }
-
-        let matches = regex.matches(in: cleaned, range: NSRange(cleaned.startIndex..., in: cleaned))
-        var verses: [(verseNumber: Int, text: String)] = []
-
-        for match in matches {
-            if let verseNumRange = Range(match.range(at: 1), in: cleaned),
-               let textRange = Range(match.range(at: 2), in: cleaned),
-               let verseNum = Int(cleaned[verseNumRange]) {
-                let text = String(cleaned[textRange]).trimmingCharacters(in: .whitespacesAndNewlines)
-                verses.append((verseNumber: verseNum, text: text))
-            }
-        }
-
-        return verses
-    }
 }
 
 // MARK: - Bold Loading View
@@ -701,11 +736,10 @@ struct VerseContentView: View {
     let chapterNumber: Int
     let highlightedVerses: Set<String>
     let onVerseTap: (String, String) -> Void
-    @State private var selectedVerse: (id: String, text: String)?
-    @State private var showVerseActions = false
+    @State private var selectedVerse: VerseSelection?
 
     private var parsedVerses: [(verseNumber: Int, text: String)] {
-        parseVerses(from: content)
+        parseBibleVerses(from: content)
     }
 
     var body: some View {
@@ -725,6 +759,12 @@ struct VerseContentView: View {
                             Image(systemName: "note.text")
                                 .font(.system(size: 10))
                                 .foregroundColor(.blue)
+                        }
+
+                        if let category = highlight?.highlightCategory {
+                            Image(systemName: category.icon)
+                                .font(.system(size: 10))
+                                .foregroundColor(category.iconColor)
                         }
                     }
                     .frame(width: 30, alignment: .trailing)
@@ -757,73 +797,21 @@ struct VerseContentView: View {
                         )
                         .contentShape(Rectangle())
                         .onTapGesture {
-                            selectedVerse = (verseId, verse.text)
+                            selectedVerse = VerseSelection(id: verseId, text: verse.text)
                             HapticManager.shared.trigger(.light)
-                            showVerseActions = true
                         }
                         .onLongPressGesture(minimumDuration: 0.5) {
-                            selectedVerse = (verseId, verse.text)
+                            selectedVerse = VerseSelection(id: verseId, text: verse.text)
                             HapticManager.shared.trigger(.medium)
-                            showVerseActions = true
                         }
                 }
             }
         }
-        .sheet(isPresented: $showVerseActions) {
-            if let verse = selectedVerse {
-                UnifiedVerseActionsSheet(verseId: verse.id, verseText: verse.text)
-            }
+        .sheet(item: $selectedVerse) { verse in
+            VerseActionsBottomSheet(verseId: verse.id, verseText: verse.text)
+                .presentationDetents([.height(300), .medium])
+                .presentationDragIndicator(.visible)
         }
-    }
-    
-    private func parseVerses(from content: String) -> [(verseNumber: Int, text: String)] {
-        // Parse HTML content to extract verse numbers and text
-        // The API returns content with verse numbers embedded
-        var verses: [(verseNumber: Int, text: String)] = []
-        
-        // Remove HTML tags but preserve verse numbers
-        let cleaned = content.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
-        
-        // Pattern to match verse numbers (e.g., "1 ", "2 ", etc.)
-        let pattern = "\\b(\\d+)\\s+"
-        let regex = try? NSRegularExpression(pattern: pattern, options: [])
-        let nsString = cleaned as NSString
-        let matches = regex?.matches(in: cleaned, options: [], range: NSRange(location: 0, length: nsString.length)) ?? []
-        
-        for (index, match) in matches.enumerated() {
-            if let verseRange = Range(match.range, in: cleaned),
-               let verseNumber = Int(String(cleaned[verseRange]).trimmingCharacters(in: .whitespaces)) {
-                
-                let startIndex = verseRange.upperBound
-                let endIndex: String.Index
-                if index < matches.count - 1,
-                   let nextRange = Range(matches[index + 1].range, in: cleaned) {
-                    endIndex = nextRange.lowerBound
-                } else {
-                    endIndex = cleaned.endIndex
-                }
-                
-                let verseText = String(cleaned[startIndex..<endIndex])
-                    .trimmingCharacters(in: .whitespacesAndNewlines)
-                
-                if !verseText.isEmpty {
-                    verses.append((verseNumber: verseNumber, text: verseText))
-                }
-            }
-        }
-        
-        // Fallback: if parsing fails, return entire content as verse 1
-        if verses.isEmpty {
-            let cleanedText = cleaned
-                .replacingOccurrences(of: "&nbsp;", with: " ")
-                .replacingOccurrences(of: "&amp;", with: "&")
-                .trimmingCharacters(in: .whitespacesAndNewlines)
-            if !cleanedText.isEmpty {
-                verses.append((verseNumber: 1, text: cleanedText))
-            }
-        }
-        
-        return verses
     }
 }
 
@@ -1367,6 +1355,225 @@ struct AddVerseNoteView: View {
     }
 }
 
+// MARK: - Verse Actions Bottom Sheet (Compact)
+struct VerseActionsBottomSheet: View {
+    @EnvironmentObject var dataStore: AppDataStore
+    @Environment(\.dismiss) var dismiss
+    let verseId: String
+    let verseText: String
+
+    @State private var selectedColor: HighlightColor = .yellow
+    @State private var showFullActions = false
+    @State private var showAddNote = false
+
+    var existingHighlight: VerseAction? {
+        dataStore.getHighlightForVerse(verseId: verseId)
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(verseId)
+                        .font(.caption.weight(.bold))
+                        .foregroundColor(.altarOrange)
+                    Text(verseText)
+                        .font(.caption)
+                        .foregroundColor(.white.opacity(0.6))
+                        .lineLimit(2)
+                }
+                Spacer()
+            }
+            .padding()
+            .background(Color.black)
+
+            Divider()
+                .background(Color.white.opacity(0.1))
+
+            // Color Picker - Horizontal Scroll
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    ForEach(HighlightColor.allCases) { color in
+                        Button(action: {
+                            selectedColor = color
+                            if let existing = existingHighlight {
+                                dataStore.updateHighlight(
+                                    verseId: verseId,
+                                    color: color,
+                                    category: existing.highlightCategory ?? .general
+                                )
+                            } else {
+                                dataStore.addVerseAction(
+                                    verseId: verseId,
+                                    action: .highlight,
+                                    content: verseText,
+                                    highlightColor: color,
+                                    highlightCategory: .general
+                                )
+                            }
+                            HapticManager.shared.trigger(.light)
+                        }) {
+                            VStack(spacing: 4) {
+                                Circle()
+                                    .fill(color.color)
+                                    .frame(width: 40, height: 40)
+                                    .overlay(
+                                        Circle()
+                                            .stroke(selectedColor == color ? Color.white : Color.clear, lineWidth: 3)
+                                    )
+                                    .shadow(color: color.color.opacity(0.4), radius: 4)
+
+                                Text(color.displayName)
+                                    .font(.caption2)
+                                    .foregroundColor(.white.opacity(0.7))
+                            }
+                        }
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.vertical, 12)
+            }
+            .background(Color.black)
+
+            Divider()
+                .background(Color.white.opacity(0.1))
+
+            // Action Buttons - Grid
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                // Highlight Button
+                Button(action: {
+                    if existingHighlight != nil {
+                        dataStore.updateHighlight(verseId: verseId, color: selectedColor, category: .general)
+                    } else {
+                        dataStore.addVerseAction(verseId: verseId, action: .highlight, content: verseText, highlightColor: selectedColor, highlightCategory: .general)
+                    }
+                    HapticManager.shared.trigger(.success)
+                    dismiss()
+                }) {
+                    VStack(spacing: 8) {
+                        Image(systemName: "highlighter")
+                            .font(.title2)
+                        Text(existingHighlight != nil ? "Update" : "Highlight")
+                            .font(.caption.weight(.semibold))
+                    }
+                    .foregroundColor(.black)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(
+                        LinearGradient(
+                            colors: [selectedColor.color, selectedColor.color.opacity(0.8)],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(12)
+                }
+
+                // More Options Button
+                Button(action: {
+                    showFullActions = true
+                }) {
+                    VStack(spacing: 8) {
+                        Image(systemName: "ellipsis.circle")
+                            .font(.title2)
+                        Text("More")
+                            .font(.caption.weight(.semibold))
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Color.white.opacity(0.1))
+                    .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                    )
+                }
+
+                // Add Note Button
+                Button(action: {
+                    showAddNote = true
+                    HapticManager.shared.trigger(.medium)
+                }) {
+                    VStack(spacing: 8) {
+                        Image(systemName: "note.text")
+                            .font(.title2)
+                        Text("Note")
+                            .font(.caption.weight(.semibold))
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Color.altarOrange.opacity(0.2))
+                    .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.altarOrange.opacity(0.5), lineWidth: 1)
+                    )
+                }
+
+                // Share Button
+                ShareLink(item: "\(verseText)\n\n- \(verseId)") {
+                    VStack(spacing: 8) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.title2)
+                        Text("Share")
+                            .font(.caption.weight(.semibold))
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Color.white.opacity(0.1))
+                    .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                    )
+                }
+            }
+            .padding()
+            .background(Color.black)
+
+            // Remove Highlight (if exists)
+            if existingHighlight != nil {
+                Button(role: .destructive, action: {
+                    dataStore.removeVerseAction(verseId: verseId, action: .highlight)
+                    HapticManager.shared.trigger(.light)
+                    dismiss()
+                }) {
+                    HStack {
+                        Image(systemName: "trash")
+                        Text("Remove Highlight")
+                    }
+                    .font(.caption.weight(.semibold))
+                    .foregroundColor(.red)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(Color.red.opacity(0.1))
+                    .cornerRadius(10)
+                }
+                .padding(.horizontal)
+                .padding(.bottom, 12)
+                .background(Color.black)
+            }
+        }
+        .background(Color.black.ignoresSafeArea())
+        .preferredColorScheme(.dark)
+        .onAppear {
+            if let existing = existingHighlight {
+                selectedColor = existing.highlightColor ?? .yellow
+            }
+        }
+        .sheet(isPresented: $showFullActions) {
+            UnifiedVerseActionsSheet(verseId: verseId, verseText: verseText)
+        }
+        .sheet(isPresented: $showAddNote) {
+            AddVerseNoteView(verseId: verseId, verseText: verseText)
+        }
+    }
+}
+
 // MARK: - Unified Verse Actions Sheet
 struct UnifiedVerseActionsSheet: View {
     @EnvironmentObject var dataStore: AppDataStore
@@ -1375,6 +1582,7 @@ struct UnifiedVerseActionsSheet: View {
     let verseText: String
 
     @State private var selectedColor: HighlightColor = .yellow
+    @State private var selectedCategory: HighlightCategory = .general
     @State private var showAddNote = false
 
     var existingHighlight: VerseAction? {
@@ -1441,14 +1649,74 @@ struct UnifiedVerseActionsSheet: View {
                         }
                     }
 
+                    // Category Picker Section
+                    VStack(alignment: .leading, spacing: AltarSpacing.medium) {
+                        HStack {
+                            Image(systemName: "tag.fill")
+                                .foregroundColor(.altarOrange)
+                            Text("CATEGORY")
+                                .font(.caption.weight(.bold))
+                                .foregroundColor(.white.opacity(0.7))
+                            Text("(Optional)")
+                                .font(.caption2)
+                                .foregroundColor(.white.opacity(0.5))
+                        }
+
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 12) {
+                            ForEach(HighlightCategory.allCases) { category in
+                                Button(action: {
+                                    selectedCategory = category
+                                    HapticManager.shared.trigger(.light)
+                                }) {
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        HStack(spacing: 8) {
+                                            Image(systemName: category.icon)
+                                                .font(.title3)
+                                                .foregroundColor(category.iconColor)
+
+                                            Spacer()
+
+                                            if selectedCategory == category {
+                                                Image(systemName: "checkmark.circle.fill")
+                                                    .foregroundColor(.altarSuccess)
+                                                    .font(.caption)
+                                            }
+                                        }
+
+                                        Text(category.rawValue)
+                                            .font(.caption.weight(.semibold))
+                                            .foregroundColor(.white)
+                                            .lineLimit(1)
+
+                                        Text(category.description)
+                                            .font(.caption2)
+                                            .foregroundColor(.white.opacity(0.6))
+                                            .lineLimit(2)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                    }
+                                    .padding(12)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .fill(selectedCategory == category ? category.iconColor.opacity(0.15) : Color.white.opacity(0.06))
+                                    )
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .stroke(selectedCategory == category ? category.iconColor.opacity(0.6) : Color.white.opacity(0.1), lineWidth: selectedCategory == category ? 2 : 1)
+                                    )
+                                }
+                            }
+                        }
+                    }
+
                     // Action Buttons Section
                     VStack(spacing: 12) {
                         // Highlight / Change Color Button
                         Button(action: {
                             if existingHighlight != nil {
-                                dataStore.updateHighlightColor(verseId: verseId, color: selectedColor)
+                                dataStore.updateHighlight(verseId: verseId, color: selectedColor, category: selectedCategory)
                             } else {
-                                dataStore.addVerseAction(verseId: verseId, action: .highlight, content: verseText, highlightColor: selectedColor)
+                                dataStore.addVerseAction(verseId: verseId, action: .highlight, content: verseText, highlightColor: selectedColor, highlightCategory: selectedCategory)
                             }
                             HapticManager.shared.trigger(.success)
                             dismiss()
@@ -1478,7 +1746,7 @@ struct UnifiedVerseActionsSheet: View {
                         }) {
                             HStack {
                                 Image(systemName: "flame.fill")
-                                Text("Add as Prayer Point")
+                                Text("Make Prayer Point")
                                     .font(.headline)
                             }
                             .foregroundColor(.white)
@@ -1610,9 +1878,10 @@ struct UnifiedVerseActionsSheet: View {
                 AddVerseNoteView(verseId: verseId, verseText: verseText)
             }
             .onAppear {
-                // Set initial color to existing highlight or default
+                // Set initial color and category to existing highlight or defaults
                 if let existing = existingHighlight {
                     selectedColor = existing.highlightColor ?? .yellow
+                    selectedCategory = existing.highlightCategory ?? .general
                 }
             }
         }

@@ -56,6 +56,28 @@ struct SettingsView: View {
                             }
                             .buttonStyle(SettingsRowButtonStyle())
                             .slideIn(delay: 0.33)
+
+                            NavigationLink(destination: AchievementsView()) {
+                                SettingsRow(
+                                    icon: "trophy.fill",
+                                    iconColor: .altarYellow,
+                                    title: "Achievements",
+                                    subtitle: "Track your progress"
+                                )
+                            }
+                            .buttonStyle(SettingsRowButtonStyle())
+                            .slideIn(delay: 0.36)
+
+                            NavigationLink(destination: MyHighlightsView()) {
+                                SettingsRow(
+                                    icon: "highlighter",
+                                    iconColor: .yellow,
+                                    title: "My Highlights",
+                                    subtitle: "View and export highlights"
+                                )
+                            }
+                            .buttonStyle(SettingsRowButtonStyle())
+                            .slideIn(delay: 0.39)
                         }
                         .padding(.horizontal)
 
